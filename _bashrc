@@ -1,0 +1,180 @@
+# simple shortcuts
+
+export MY_DEV_PATH=~/development
+export MY_EDITOR=mate
+
+bashrc () {
+    ed ~/.bashrc;
+}
+
+reload () { 
+	source ~/.bashrc; 
+	source ~/.profile; 
+	echo '.bashrc and .profile reloaded!';
+}
+
+ed () {
+    if [ "$#" -lt 1  ]; then
+           echo "Usage: ed \"editor args + directory or filename\""
+           return;
+    fi
+    $MY_EDITOR $*;
+}
+
+#python
+py () { ipython -noconfirm -nobanner $* || (echo "iPython not installed using default python shell" && ppy); }
+ppy () { python $*; }
+
+# django Environment Variables
+export DJANGO_APP_PREFIX="django-";
+export DEV_DJANGO=$MY_DEV_PATH/django;
+export DEV_DJANGO_APPS=$DEV_DJANGO/apps;
+export DEV_DJANGO_SITES=$DEV_DJANGO/sites;
+
+dj () {
+    # list all django commands here incase i forget them :)
+    echo "===  DJANGO COMMANDS  ========================";
+
+    echo ""
+    echo "===  DJANGO SITES  ========================";
+
+    echo ""
+    echo "===  DJANGO APPS  ========================";
+
+}
+
+#django dev
+ddv () { cd $DEV_DJANGO/$*;}
+
+#django runserver
+drs () { ./manage.py runserver $*; }
+
+#django shellplus requires django_extensions
+dsh () { 
+    ./manage.py shell_plus || (echo "Using Default Django shell instead!" && dshb);    
+}
+
+dshb () {
+    ./manage.py shell;
+}
+
+
+dsdb () { ./manage.py syncdb; }
+
+dre () { 
+    if [ "$#" -lt 1 ]; then
+        echo "Usage: djre \"django app name\""
+        return;
+    fi
+    
+    ./manage.py reset $1;
+}
+
+# django app functions
+da () { cd $DEV_DJANGO_APPS/$*; }
+lsda () { ls $* $DEV_DJANGO_APPS; }
+
+
+edda () {
+    if [ "$#" -lt 1  ]; then
+        echo "Usage: djea \"django app name\""
+        return;
+    fi
+    
+    for a in $*; do
+        if [ -d $DEV_DJANGO_APPS/$DJANGO_APP_PREFIX$a ]; then
+            ed $DEV_DJANGO_APPS/$DJANGO_APP_PREFIX$a;
+        elif [ -d $DEV_DJANGO_APPS/$a ]; then
+            ed $DEV_DJANGO_APPS/$a;
+        else
+            echo "neither '"$DJANGO_APP_PREFIX$a "' or '" $a "' exist in " $DEV_DJANGO_APPS;
+        fi
+    done    
+}
+mkda () {
+    if [ "$#" -lt 1  ]; then
+        echo "Usage: djmka \"django app name\""
+        return;
+    fi
+    
+    # define path
+    new_app_path=$DEV_DJANGO_APPS/$DJANGO_APP_PREFIX$1;    
+    
+    # make default folders
+    mkdir -p $new_app_path"/examples" $new_app_path"/docs" $new_app_path"/tests";
+    
+    cd $new_app_path
+    
+    # create default files
+    touch AUTHORS && echo "django-"$1" == TODO" > AUTHORS 
+    touch README && echo "django-"$1" == TODO" > README 
+    touch INSTALL && echo "django-"$1" == TODO" > INSTALL 
+    touch setup.py && echo "django-"$1" == TODO" > setup.py 
+    touch LICENSE && echo "django-"$1" == TODO" > LICENSE 
+    
+    # create app
+    django-admin.py startapp $1;
+    
+    # setup initial repo
+    git init -q && git add . && git commit -q -m "Initial Commit";
+    
+    # add app to python path requires pylink/plink
+    pylink $1 $1;
+}
+
+rmda () {
+
+    if [ "$#" -lt 1 ]; then
+       echo "Usage: rmda \"django app name\" e.g. rmda people";
+       echo -n "This will remove '"$DJANGO_APP_PREFIX"people' from the django app folder";
+       echo " and the symlink from site-packages.";
+       return;
+    fi
+    echo "Are you sure you wish to delete django app: ";
+    apppath="$DEV_DJANGO_APPS/$DJANGO_APP_PREFIX$1";
+    echo ">> $apppath";
+    echo -n "Yes/No? ";
+    read answer;
+    answer="`echo $answer|tr '[:upper:]' '[:lower:]'`";
+    if [ "$answer" = "yes" ] || [ "$answer" = "y" ]; then
+        
+        # unlink from python path
+        pyunlink $1;
+        
+        # recursively delete app from django apps folder
+        rm -rfv $apppath;
+
+        echo "Django App '$DJANGO_APP_PREFIX$1' successfully removed"
+
+        return;
+    elif [ "$answer" = "no" ] || [ "$answer" = "n" ]; then
+        echo "Remove django App $DJANGO_APP_PREFIX$1 stopped";
+        return;
+    else
+    echo "Nothing happend Incorrect answer";
+    fi
+}
+ds () { cd $DEV_DJANGO_SITES/$*; }
+lsds () { ls $* $DEV_DJANGO_SITES; }
+edds () { 
+    if [ "$#" -lt 1 ]; then
+        echo "Usage: edds \"django site name\" e.g. edds newspaper.com"
+        echo ">> This changes to the selected folder and launches it in your favorite editor 'Textmate'"
+        return;
+    fi
+    
+    cd $DEV_DJANGO_SITES/$1;
+    ed .;         
+}
+
+mkds () { 
+    if [ "$#" -lt 1 ]; then
+        echo "Usage: mkds \"django project name\""
+        return;
+    fi
+
+    pushd $DEV_DJANGO_SITES;
+    django-admin.py startproject $1;
+    popd;
+}
+

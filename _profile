@@ -1,0 +1,13 @@
+export PATH=/usr/local/git/bin:$PATH
+
+#add a user site-packages to the python path
+export SITE_PACKAGES=~/python/site-packages
+export PYTHONPATH=$SITE_PACKAGES:$PYTHONPATH
+
+#add mysql to the path
+export PATH=/usr/local/mysql/bin:$PATH
+
+#add a user bin to the PATH for custom python scripts like 
+# django's manage.py, pylink etc... 
+export PATH=~/python/bin:$PATH
+export PATH=~/bin:$PATH
