@@ -3,11 +3,12 @@
 export MY_DEV_PATH=~/development
 export MY_EDITOR=mate
 
-bashrc () {
-    ed ~/.bashrc;
+edbp () {
+    ed $MY_DEV_PATH/bash-profile;
 }
 
 reload () { 
+    # Forces a reload of both the .bashrc and .profile files in the current bash session
 	source ~/.bashrc; 
 	source ~/.profile; 
 	echo '.bashrc and .profile reloaded!';
@@ -77,7 +78,8 @@ lsda () { ls $* $DEV_DJANGO_APPS; }
 
 edda () {
     if [ "$#" -lt 1  ]; then
-        echo "Usage: djea \"django app name\""
+        echo "Usage: edda django-app app";
+        echo "This launches each django app supplied as arguments in your favorite editor."
         return;
     fi
     
@@ -85,11 +87,14 @@ edda () {
         if [ -d $DEV_DJANGO_APPS/$DJANGO_APP_PREFIX$a ]; then
             ed $DEV_DJANGO_APPS/$DJANGO_APP_PREFIX$a;
         elif [ -d $DEV_DJANGO_APPS/$a ]; then
+            # old not migrated apps
+            # TODO remove once all apps have been ported
             ed $DEV_DJANGO_APPS/$a;
         else
             echo "neither '"$DJANGO_APP_PREFIX$a "' or '" $a "' exist in " $DEV_DJANGO_APPS;
         fi
-    done    
+    done   
+     
 }
 mkda () {
     if [ "$#" -lt 1  ]; then
@@ -100,17 +105,23 @@ mkda () {
     # define path
     new_app_path=$DEV_DJANGO_APPS/$DJANGO_APP_PREFIX$1;    
     
+    if [ -d $new_app_path ]; then
+      echo $DJANGO_APP_PREFIX$1 " already exists";
+    fi
+    
+    # TODO add python import test against existing apps on pythonpath
+
     # make default folders
     mkdir -p $new_app_path"/examples" $new_app_path"/docs" $new_app_path"/tests";
     
-    cd $new_app_path
+    pushd $new_app_path;
     
     # create default files
-    touch AUTHORS && echo "django-"$1" == TODO" > AUTHORS 
-    touch README && echo "django-"$1" == TODO" > README 
-    touch INSTALL && echo "django-"$1" == TODO" > INSTALL 
-    touch setup.py && echo "django-"$1" == TODO" > setup.py 
-    touch LICENSE && echo "django-"$1" == TODO" > LICENSE 
+    touch AUTHORS && echo "django-"$1" == TODO" > AUTHORS;
+    touch README && echo "django-"$1" == TODO" > README;
+    touch INSTALL && echo "django-"$1" == TODO" > INSTALL; 
+    touch setup.py && echo "django-"$1" == TODO" > setup.py; 
+    touch LICENSE && echo "django-"$1" == TODO" > LICENSE;
     
     # create app
     django-admin.py startapp $1;
@@ -120,6 +131,8 @@ mkda () {
     
     # add app to python path requires pylink/plink
     pylink $1 $1;
+    
+    popd;
 }
 
 rmda () {
@@ -130,12 +143,25 @@ rmda () {
        echo " and the symlink from site-packages.";
        return;
     fi
+    # check to see if app exists with or without django-prefix
+    if [ -d $DEV_DJANGO_APPS/$DJANGO_APP_PREFIX$1 ]; then
+        apppath=$DEV_DJANGO_APPS/$DJANGO_APP_PREFIX$1;
+    elif [ -d $DEV_DJANGO_APPS/$a ]; then
+        # old not migrated apps
+        # TODO remove once all apps have been ported
+        apppath=$DEV_DJANGO_APPS/$1;
+    else
+        echo "neither '"$DJANGO_APP_PREFIX$1 "' or '" $1 "' exist in " $DEV_DJANGO_APPS;
+        return;
+    fi
+    
+    # ask for confirmation
     echo "Are you sure you wish to delete django app: ";
-    apppath="$DEV_DJANGO_APPS/$DJANGO_APP_PREFIX$1";
     echo ">> $apppath";
     echo -n "Yes/No? ";
     read answer;
     answer="`echo $answer|tr '[:upper:]' '[:lower:]'`";
+    
     if [ "$answer" = "yes" ] || [ "$answer" = "y" ]; then
         
         # unlink from python path
@@ -144,16 +170,18 @@ rmda () {
         # recursively delete app from django apps folder
         rm -rfv $apppath;
 
-        echo "Django App '$DJANGO_APP_PREFIX$1' successfully removed"
+        echo "Django App '$apppath' successfully removed"
 
         return;
+        
     elif [ "$answer" = "no" ] || [ "$answer" = "n" ]; then
-        echo "Remove django App $DJANGO_APP_PREFIX$1 stopped";
+        echo "Remove django App $apppath stopped";
         return;
     else
-    echo "Nothing happend Incorrect answer";
+        echo "Nothing happend Incorrect answer";
     fi
 }
+
 ds () { cd $DEV_DJANGO_SITES/$*; }
 lsds () { ls $* $DEV_DJANGO_SITES; }
 edds () { 
@@ -177,4 +205,3 @@ mkds () {
     django-admin.py startproject $1;
     popd;
 }
-
