@@ -1,5 +1,6 @@
 # simple shortcuts
 
+
 export MY_DEV_PATH=~/development
 export MY_EDITOR=mate
 
@@ -22,11 +23,26 @@ ed () {
     $MY_EDITOR $*;
 }
 
-#python
-py () { ipython -noconfirm -nobanner $* || (echo "iPython not installed using default python shell" && ppy); }
+#-----------------------------------------------------> PYTHON Functions and Overrides
+
+export IPYTHON_PATH=/usr/local/bin/ipython;
+
+py () {
+    if command -v ipython >/dev/null; then
+        ipython $*;
+    else
+        echo "ipython is not installed using default python shell";
+        ppy;
+    fi 
+}
 ppy () { python $*; }
 
-# django Environment Variables
+#override ipython for faster launch & exits
+ipython () {
+   $IPYTHON_PATH -noconfirm -nobanner $*;
+}
+
+#-----------------------------------------------------> django Environment Variables
 export DJANGO_APP_PREFIX="django-";
 export DEV_DJANGO=$MY_DEV_PATH/django;
 export DEV_DJANGO_APPS=$DEV_DJANGO/apps;
