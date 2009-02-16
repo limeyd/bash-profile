@@ -26,6 +26,9 @@ ed () {
 #-----------------------------------------------------> PYTHON Functions and Overrides
 
 export IPYTHON_PATH=/usr/local/bin/ipython;
+export LOCAL_PYTHON_PATH=~/python;
+export LOCAL_PYTHON_SRC_PATH=$LOCAL_PYTHON_PATH/src;
+export LOCAL_PYTHON_SITE_PACKAGES=$LOCAL_PYTHON_PATH/site-packages;
 
 py () {
     if command -v ipython >/dev/null; then
@@ -40,6 +43,14 @@ ppy () { python $*; }
 #override ipython for faster launch & exits
 ipython () {
    $IPYTHON_PATH -noconfirm -nobanner $*;
+}
+
+cdpys () {
+    cd $LOCAL_PYTHON_SRC_PATH;
+}
+
+lslsp () {
+    ls -l $LOCAL_PYTHON_SITE_PACKAGES;
 }
 
 #-----------------------------------------------------> django Environment Variables
@@ -61,7 +72,7 @@ dj () {
 }
 
 #django dev
-ddv () { cd $DEV_DJANGO/$*;}
+cddj () { cd $DEV_DJANGO/$*;}
 
 #django runserver
 drs () { ./manage.py runserver $*; }
@@ -88,7 +99,7 @@ dre () {
 }
 
 # django app functions
-da () { cd $DEV_DJANGO_APPS/$*; }
+cdda () { cd $DEV_DJANGO_APPS/$*; }
 lsda () { ls $* $DEV_DJANGO_APPS; }
 
 
@@ -162,7 +173,7 @@ rmda () {
     # check to see if app exists with or without django-prefix
     if [ -d $DEV_DJANGO_APPS/$DJANGO_APP_PREFIX$1 ]; then
         apppath=$DEV_DJANGO_APPS/$DJANGO_APP_PREFIX$1;
-    elif [ -d $DEV_DJANGO_APPS/$a ]; then
+    elif [ -d $DEV_DJANGO_APPS/$1 ]; then
         # old not migrated apps
         # TODO remove once all apps have been ported
         apppath=$DEV_DJANGO_APPS/$1;
@@ -198,7 +209,7 @@ rmda () {
     fi
 }
 
-ds () { cd $DEV_DJANGO_SITES/$*; }
+cdds () { cd $DEV_DJANGO_SITES/$*; }
 lsds () { ls $* $DEV_DJANGO_SITES; }
 edds () { 
     if [ "$#" -lt 1 ]; then
