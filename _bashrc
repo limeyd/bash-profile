@@ -23,6 +23,22 @@ ed () {
     $MY_EDITOR $*;
 }
 
+#-----------------------------------------------------> FLASH DEV
+export DEV_FLASH=$MY_DEV_PATH/flash;
+cdfl (){
+    cd $DEV_FLASH/$1;
+}
+
+edfl (){
+    if [ "$#" -lt 1 ]; then
+        echo "Usage: edfl \"flash app name\""
+        return;
+    fi
+    ed $DEV_FLASH/$1;
+}
+lsfl () {
+    ls -l $DEV_FLASH;
+}
 #-----------------------------------------------------> PYTHON Functions and Overrides
 
 export IPYTHON_PATH=/usr/local/bin/ipython;
