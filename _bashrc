@@ -34,6 +34,7 @@ edfl (){
         echo "Usage: edfl \"flash app name\""
         return;
     fi
+    open -ga "Adobe Flash CS4" $DEV_FLASH/$1/$1".fla";
     ed $DEV_FLASH/$1;
 }
 lsfl () {
