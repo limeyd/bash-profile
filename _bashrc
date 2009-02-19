@@ -38,6 +38,9 @@ edfl (){
     if [ -d $DEV_FLASH/$1 ]; then
         open -ga "Adobe Flash CS4" $DEV_FLASH/$1/$1".fla";
         ed $DEV_FLASH/$1;
+    else
+        echo $1 "does not exist in " $DEV_FLASH;
+        return;
     fi
 }
 lsfl () {
