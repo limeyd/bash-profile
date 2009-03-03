@@ -23,6 +23,43 @@ ed () {
     $MY_EDITOR $*;
 }
 
+#-----------------------------------------------------> RAILS DEV
+
+export DEV_RAILS=$MY_DEV_PATH/rails;
+
+cdr (){
+    cd $DEV_RAILS/$1;
+}
+
+# ls rails apps or give path in the rails directory
+lsr (){
+    ls -l $DEV_RAILS/$1;
+}
+
+# Rails run server
+rss (){
+
+    if [ "$#" -lt 0 ]; then
+        # just run script/server on local directory
+        ./script/server
+    else
+        cd $DEV_RAILS/$1
+        ./script/server
+    fi
+}
+
+edr(){
+    
+    if [ "$#" -lt 1  ]; then
+        echo "Usage: edr rails-app";
+        echo "This launches the rails app supplied in your favorite editor."
+        return;
+    fi
+    
+    cd $DEV_RAILS/$1
+    ed .
+}
+
 #-----------------------------------------------------> FLASH DEV
 export DEV_FLASH=$MY_DEV_PATH/flash;
 cdfl (){
